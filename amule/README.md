@@ -1,22 +1,43 @@
 # Notice
 
-This Dockerfile is only for x86_64 architecture only. If you're interested in ARM port, have a look at [this fork](https://github.com/synopsis8/dockerfiles)
+This Dockerfile is for x86_64 architecture only. 
 
-# Configuration
-
-Create needed directories with
-
-```sh
-mkdir -p ./amule/conf
-mkdir -p ./amule/tmp
-mkdir -p ./amule/incoming
-```
+This is a fork of [tchabaud repository](https://github.com/tchabaud/dockerfiles), so all credits for him. Changes are:
+* Reduced image size (~100MB)
+* aMule compiled using Boost lib to use ASIO sockets instead of wxWidgets
 
 # Usage
 
+## Docker compose
+
+```
+---
+version: "2.1"
+services:
+  amule:
+    image: jjmcampoy/amule
+    container_name: amule
+    environment:
+      - PUID=1001
+      - PGID=1000
+      - WEBUI_PWD=password
+      - WEBUI_TEMPLATE=AmuleWebUI-Reloaded
+    volumes:
+      - /path/to/amule/config:/home/amule/.aMule
+      - /path/to/amule/tmp:/temp
+      - /path/to/amule/incoming:/incoming
+    ports:
+      - 4711:4711
+      - 4662:4662
+      - 4672:4672/udp
+    restart: unless-stopped
+```
+
+## docker cli
+
 Just run the container with the following command lines (replace brackets with the values you want to use) :
 
-## Start from scratch
+### Start from scratch
 
 If you don't have any existing amule configuration, you can specify a custom password for GUI and / or WebUI using adequate environment variables.
 
@@ -37,7 +58,7 @@ docker run -p 4711:4711 -p 4662:4662 -p 4672:4672/udp \
     -e WEBUI_PWD=[wanted_password_for_web_interface] \
     -v ./amule/conf:/home/amule/.aMule -v ./amule/incoming:/incoming -v ./amule/tmp:/temp tchabaud/amule
 ```
-## Using an existing amule configuration
+### Using an existing amule configuration
 
 Just mount existing directory as a volume :
 
@@ -47,9 +68,7 @@ docker run -p 4711:4711 -p 4662:4662 -p 4672:4672/udp \
     -v ~/.aMule:/home/amule/.aMule -v ~/.aMule/Incoming:/incoming -v ~/.aMule/Temp:/temp tchabaud/amule
 ```
 
-Then point your browser to http://localhost:4711
-
-## Web UI theming
+### Web UI theming
 
 If you don't like default amule web ui, you can switch [to this nice bootstrap based web theme](https://github.com/MatteoRagni/AmuleWebUI-Reloaded) by setting the environment variable _WEBUI_TEMPLATE_ to _AmuleWebUI-Reloaded_
 
